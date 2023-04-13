@@ -38,7 +38,6 @@ public class RegistroHuesped extends JFrame {
     private JLabel labelExit;
     private JLabel labelAtras;
     int xMouse, yMouse;
-
     /**
      * Launch the application.
      */
