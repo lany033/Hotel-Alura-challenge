@@ -13,7 +13,7 @@ public class ReservaController {
     }
 
     public void guardar(Reserva reserva){
-        //reserva.setHuespedId(huespedId);
+
         reservaDAO.guardar(reserva);
     }
 

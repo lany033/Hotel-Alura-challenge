@@ -1,7 +1,6 @@
 package dao;
 
 import modelo.Reserva;
-
 import java.sql.*;
 import java.time.ZoneId;
 
@@ -32,13 +31,14 @@ public class ReservaDAO {
                 try (resultSet){
                     while (resultSet.next()) {
                         reserva.setId(resultSet.getInt(1));
-
                     }
                 }
             }
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
     }
+
+
 }

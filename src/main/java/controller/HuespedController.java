@@ -12,7 +12,9 @@ public class HuespedController {
         this.huespedDAO = new HuespedDAO(factory.recuperaConexion());
     }
 
-    public void guardarHuesped(Huesped huesped){
+    public void guardarHuesped(Huesped huesped, Integer reservaId){
+        huesped.setReservaId(reservaId);
+        System.out.println("Se setea el id: " + reservaId);
         huespedDAO.guardarHuesped(huesped);
     }
 }

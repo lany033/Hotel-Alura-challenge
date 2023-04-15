@@ -17,6 +17,10 @@ public class Reserva {
         this.forma_de_pago = forma_de_pago;
     }
 
+    public Reserva() {
+
+    }
+
     public Integer getId() {
         return id;
     }

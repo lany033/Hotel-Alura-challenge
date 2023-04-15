@@ -10,7 +10,6 @@ import com.toedter.calendar.JDateChooser;
 import controller.ReservaController;
 import modelo.Huesped;
 import modelo.Reserva;
-
 import java.awt.Font;
 import java.text.Format;
 import java.awt.event.MouseAdapter;
@@ -325,9 +324,8 @@ public class ReservasView extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (ReservasView.txtFechaEntrada.getDate() != null && ReservasView.txtFechaSalida.getDate() != null) {
-                    RegistroHuesped registro = new RegistroHuesped();
                     guardar();
-                    registro.setVisible(true);
+
                 } else {
                     JOptionPane.showMessageDialog(null, "Debes llenar todos los campos.");
                 }
@@ -358,7 +356,9 @@ public class ReservasView extends JFrame {
             var reserva = new Reserva(fechaEntrada,fechaSalida,valorDeLaReserva,txtFormaPago.getSelectedItem().toString());
             System.out.println(fechaEntrada.toString() + " " + fechaSalida.toString()+ " " + valorDeLaReserva+ " " + txtFormaPago.getSelectedItem().toString());
             reservaController.guardar(reserva);
-
+            RegistroHuesped registro = new RegistroHuesped(reserva.getId());
+            registro.setVisible(true);
+            dispose();
         }catch (Exception e){
             System.out.println("Error: " + e.getMessage());
         }
