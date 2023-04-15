@@ -7,6 +7,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import java.awt.Color;
 import com.toedter.calendar.JDateChooser;
+import controller.HuespedController;
+import modelo.Huesped;
+
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
@@ -22,6 +25,9 @@ import java.awt.event.MouseMotionAdapter;
 import java.text.Format;
 import java.awt.event.ActionEvent;
 import java.awt.Toolkit;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.sql.Date;
 import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
 
@@ -37,11 +43,16 @@ public class RegistroHuesped extends JFrame {
     private JComboBox<Format> txtNacionalidad;
     private JLabel labelExit;
     private JLabel labelAtras;
+    private LocalDate fechaN;
+
+    private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+    private HuespedController huespedController;
     int xMouse, yMouse;
     /**
      * Launch the application.
      */
     public static void main(String[] args) {
+
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
@@ -58,7 +69,7 @@ public class RegistroHuesped extends JFrame {
      * Create the frame.
      */
     public RegistroHuesped() {
-
+        this.huespedController = new HuespedController();
         setIconImage(Toolkit.getDefaultToolkit().getImage(RegistroHuesped.class.getResource("/imagenes/lOGO-50PX.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 910, 634);
@@ -144,6 +155,8 @@ public class RegistroHuesped extends JFrame {
         txtFechaN.getCalendarButton().setIcon(new ImageIcon(RegistroHuesped.class.getResource("/imagenes/icon-reservas.png")));
         txtFechaN.getCalendarButton().setBackground(SystemColor.textHighlight);
         txtFechaN.setDateFormatString("yyyy-MM-dd");
+        //fechaN = LocalDate.parse(txtFechaN.getDate().toString());
+
         contentPane.add(txtFechaN);
 
         txtNacionalidad = new JComboBox();
@@ -252,6 +265,7 @@ public class RegistroHuesped extends JFrame {
         btnguardar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                guardarHuesped();
             }
         });
         btnguardar.setLayout(null);
@@ -327,4 +341,14 @@ public class RegistroHuesped extends JFrame {
         this.setLocation(x - xMouse, y - yMouse);
     }
 
+    private void guardarHuesped(){
+        try{
+            fechaN = LocalDate.parse(sdf2.format(txtFechaN.getDate()));
+            var huesped = new Huesped(txtNombre.getText(),txtApellido.getText(),fechaN,txtNacionalidad.getSelectedItem().toString(),txtTelefono.getText());
+            this.huespedController.guardarHuesped(huesped);
+            System.out.println(txtNombre.getText() + txtApellido.getText() + fechaN);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
 }
