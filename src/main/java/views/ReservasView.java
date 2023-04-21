@@ -11,6 +11,7 @@ import controller.ReservaController;
 import modelo.Huesped;
 import modelo.Reserva;
 import java.awt.Font;
+import java.sql.Date;
 import java.text.Format;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -43,8 +44,8 @@ public class ReservasView extends JFrame {
     private Long diasDeDiferencia;
     private Double tarifa = 70.0;
     private Double valorDeLaReserva;
-    private LocalDate fechaEntrada;
-    private LocalDate fechaSalida;
+    private Date fechaEntrada;
+    private Date fechaSalida;
     private ReservaController reservaController;
 
     String formaDePago;
@@ -280,9 +281,9 @@ public class ReservasView extends JFrame {
             //Activa el evento, después del usuario seleccionar las fechas se debe calcular el valor de la reserva
             public void propertyChange(PropertyChangeEvent evt) {
                 try {
-                    fechaEntrada = LocalDate.parse(sdf.format(txtFechaEntrada.getDate()));
-                    fechaSalida = LocalDate.parse(sdf.format(txtFechaSalida.getDate()));
-                    diff = Duration.between(fechaEntrada.atStartOfDay(),fechaSalida.atStartOfDay());
+                    fechaEntrada = Date.valueOf(((JTextField)txtFechaEntrada.getDateEditor().getUiComponent()).getText());
+                    fechaSalida = Date.valueOf(((JTextField)txtFechaSalida.getDateEditor().getUiComponent()).getText());
+                    diff = Duration.between(sdf.parse(fechaEntrada.toString()).toInstant(),sdf.parse(fechaSalida.toString()).toInstant());
                     diasDeDiferencia= diff.toDays();
                     valorDeLaReserva = diasDeDiferencia * tarifa;
                     txtValor.setText(valorDeLaReserva.toString());

@@ -46,7 +46,7 @@ public class RegistroHuesped extends JFrame {
     private JComboBox<Format> txtNacionalidad;
     private JLabel labelExit;
     private JLabel labelAtras;
-    private LocalDate fechaN;
+    private Date fechaN;
     private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
     private HuespedController huespedController;
     private ReservaController reservaController;
@@ -349,7 +349,7 @@ public class RegistroHuesped extends JFrame {
 
     private void guardarHuesped(){
         try{
-            fechaN = LocalDate.parse(sdf2.format(txtFechaN.getDate()));
+            fechaN = Date.valueOf(((JTextField)txtFechaN.getDateEditor().getUiComponent()).getText());
             var huesped = new Huesped(txtNombre.getText(),txtApellido.getText(),fechaN,txtNacionalidad.getSelectedItem().toString(),txtTelefono.getText());
             var reserva_id = Integer.parseInt(txtNreserva.getText());
             this.huespedController.guardarHuesped(huesped,reserva_id);

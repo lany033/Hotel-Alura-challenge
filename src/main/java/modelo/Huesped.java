@@ -1,12 +1,13 @@
 package modelo;
 
+import java.sql.Date;
 import java.time.LocalDate;
 
 public class Huesped {
     private Integer id;
     private final String nombre;
     private String apellido;
-    private LocalDate fecha_de_nacimiento;
+    private Date fecha_de_nacimiento;
     private String nacionalidad;
     private String telefono;
     private Integer reservaId;
@@ -15,12 +16,22 @@ public class Huesped {
         return reservaId;
     }
 
-    public Huesped(String nombre, String apellido, LocalDate fecha_de_nacimiento, String nacionalidad, String telefono) {
+    public Huesped(String nombre, String apellido, Date fecha_de_nacimiento, String nacionalidad, String telefono) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.fecha_de_nacimiento = fecha_de_nacimiento;
         this.nacionalidad = nacionalidad;
         this.telefono = telefono;
+    }
+
+    public Huesped(Integer id, String nombre, String apellido, Date fecha_de_nacimiento, String nacionalidad, String telefono, Integer reservaId) {
+        this.id = id;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.fecha_de_nacimiento = fecha_de_nacimiento;
+        this.nacionalidad = nacionalidad;
+        this.telefono = telefono;
+        this.reservaId = reservaId;
     }
 
     public void setReservaId(Integer reservaId) {
@@ -43,7 +54,7 @@ public class Huesped {
         return apellido;
     }
 
-    public LocalDate getFecha_de_nacimiento() {
+    public Date getFecha_de_nacimiento() {
         return fecha_de_nacimiento;
     }
 
