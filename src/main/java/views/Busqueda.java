@@ -1,30 +1,16 @@
 package views;
 
-import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import controller.HuespedController;
+import controller.ReservaController;
+import java.awt.*;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.ImageIcon;
-import java.awt.Color;
-import java.awt.SystemColor;
-import javax.swing.JLabel;
-import java.awt.Font;
-import java.awt.event.ActionListener;
-import java.util.List;
-import java.awt.event.ActionEvent;
-import javax.swing.JTabbedPane;
-import java.awt.Toolkit;
-import javax.swing.SwingConstants;
-import javax.swing.JSeparator;
-import javax.swing.ListSelectionModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.sql.*;
+import java.util.Optional;
 
 @SuppressWarnings("serial")
 public class Busqueda extends JFrame {
@@ -33,10 +19,12 @@ public class Busqueda extends JFrame {
     private JTextField txtBuscar;
     private JTable tbHuespedes;
     private JTable tbReservas;
-    private DefaultTableModel modelo;
+    private DefaultTableModel modeloTbReservas;
     private DefaultTableModel modeloHuesped;
     private JLabel labelAtras;
     private JLabel labelExit;
+    private ReservaController reservaController;
+    private HuespedController huespedController;
     int xMouse, yMouse;
 
     /**
@@ -59,6 +47,9 @@ public class Busqueda extends JFrame {
      * Create the frame.
      */
     public Busqueda() {
+        this.reservaController = new ReservaController();
+        this.huespedController = new HuespedController();
+
         setIconImage(Toolkit.getDefaultToolkit().getImage(Busqueda.class.getResource("/imagenes/lupa2.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 910, 571);
@@ -76,7 +67,6 @@ public class Busqueda extends JFrame {
         contentPane.add(txtBuscar);
         txtBuscar.setColumns(10);
 
-
         JLabel lblNewLabel_4 = new JLabel("SISTEMA DE BÚSQUEDA");
         lblNewLabel_4.setForeground(new Color(12, 138, 199));
         lblNewLabel_4.setFont(new Font("Roboto Black", Font.BOLD, 24));
@@ -90,20 +80,19 @@ public class Busqueda extends JFrame {
         contentPane.add(panel);
 
 
-
-
         tbReservas = new JTable();
         tbReservas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tbReservas.setFont(new Font("Roboto", Font.PLAIN, 16));
-        modelo = (DefaultTableModel) tbReservas.getModel();
-        modelo.addColumn("Numero de Reserva");
-        modelo.addColumn("Fecha Check In");
-        modelo.addColumn("Fecha Check Out");
-        modelo.addColumn("Valor");
-        modelo.addColumn("Forma de Pago");
+        modeloTbReservas = (DefaultTableModel) tbReservas.getModel();
+        modeloTbReservas.addColumn("Numero de Reserva");
+        modeloTbReservas.addColumn("Fecha Check In");
+        modeloTbReservas.addColumn("Fecha Check Out");
+        modeloTbReservas.addColumn("Valor");
+        modeloTbReservas.addColumn("Forma de Pago");
         JScrollPane scroll_table = new JScrollPane(tbReservas);
         panel.addTab("Reservas", new ImageIcon(Busqueda.class.getResource("/imagenes/reservado.png")), scroll_table, null);
         scroll_table.setVisible(true);
+        cargarTablaDeReservas();
 
 
         tbHuespedes = new JTable();
@@ -120,6 +109,7 @@ public class Busqueda extends JFrame {
         JScrollPane scroll_tableHuespedes = new JScrollPane(tbHuespedes);
         panel.addTab("Huéspedes", new ImageIcon(Busqueda.class.getResource("/imagenes/pessoas.png")), scroll_tableHuespedes, null);
         scroll_tableHuespedes.setVisible(true);
+        cargarTablaHuesped();
 
         JLabel lblNewLabel_2 = new JLabel("");
         lblNewLabel_2.setIcon(new ImageIcon(Busqueda.class.getResource("/imagenes/Ha-100px.png")));
@@ -194,6 +184,7 @@ public class Busqueda extends JFrame {
                 labelExit.setForeground(Color.black);
             }
         });
+
         btnexit.setLayout(null);
         btnexit.setBackground(Color.WHITE);
         btnexit.setBounds(857, 0, 53, 36);
@@ -232,6 +223,23 @@ public class Busqueda extends JFrame {
         lblBuscar.setForeground(Color.WHITE);
         lblBuscar.setFont(new Font("Roboto", Font.PLAIN, 18));
 
+        btnbuscar.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) { //Al usuario pasar el mouse por el botón este cambiará de color
+                btnbuscar.setBackground(Color.cyan);
+                lblBuscar.setForeground(Color.white);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) { //Al usuario quitar el mouse por el botón este volverá al estado original
+                btnbuscar.setBackground(new Color(12, 138, 199));
+                lblBuscar.setForeground(Color.white);
+            }
+        });
+
         JPanel btnEditar = new JPanel();
         btnEditar.setLayout(null);
         btnEditar.setBackground(new Color(12, 138, 199));
@@ -245,6 +253,24 @@ public class Busqueda extends JFrame {
         lblEditar.setFont(new Font("Roboto", Font.PLAIN, 18));
         lblEditar.setBounds(0, 0, 122, 35);
         btnEditar.add(lblEditar);
+        btnEditar.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                modificar();
+                limpiarTablas();
+
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) { //Al usuario pasar el mouse por el botón este cambiará de color
+                btnEditar.setBackground(Color.cyan);
+                lblEditar.setForeground(Color.white);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) { //Al usuario quitar el mouse por el botón este volverá al estado original
+                btnEditar.setBackground(new Color(12, 138, 199));
+                lblEditar.setForeground(Color.white);
+            }
+        });
 
         JPanel btnEliminar = new JPanel();
         btnEliminar.setLayout(null);
@@ -260,6 +286,128 @@ public class Busqueda extends JFrame {
         lblEliminar.setBounds(0, 0, 122, 35);
         btnEliminar.add(lblEliminar);
         setResizable(false);
+
+        btnEliminar.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                eliminar();
+                limpiarTablas();
+                cargarTablas();
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) { //Al usuario pasar el mouse por el botón este cambiará de color
+                btnEliminar.setBackground(Color.CYAN);
+                lblEliminar.setForeground(Color.white);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) { //Al usuario quitar el mouse por el botón este volverá al estado original
+                btnEliminar.setBackground(new Color(12, 138, 199));
+                lblEliminar.setForeground(Color.white);
+            }
+            private void cargarTablas() {
+                if (scroll_table.isVisible()) {
+                    System.out.println("Cargando tabla de reservas");
+                    cargarTablaDeReservas();
+                } else if (scroll_tableHuespedes.isVisible()){
+                    System.out.println("Cargando tabla de huespedes");
+                    cargarTablaHuesped();
+                }
+            }
+        });
+
+    }
+    private boolean tieneFilaElegidaReserva() {
+
+        return tbReservas.getSelectedRowCount() == 0 || tbReservas.getSelectedColumnCount() == 0;
+    }private boolean tieneFilaElegidaHuespedes() {
+        return tbHuespedes.getSelectedRowCount() == 0 || tbHuespedes.getSelectedColumnCount() == 0;
+    }
+    private void limpiarTablas() {
+        System.out.println("limpiando tablas");
+        modeloTbReservas.getDataVector().clear();
+        modeloHuesped.getDataVector().clear();
+    }
+
+    private void cargarTablaHuesped() {
+        var huespedes = huespedController.listarHuesped();
+
+        huespedes.forEach(reserva -> modeloHuesped.addRow(new Object[] {
+                reserva.getId(),
+                reserva.getNombre(),
+                reserva.getApellido(),
+                reserva.getFecha_de_nacimiento(),
+                reserva.getNacionalidad(),
+                reserva.getTelefono(),
+                reserva.getReservaId()
+        }));
+    }
+
+    private void cargarTablaDeReservas() {
+        var reservas = reservaController.listar();
+
+        reservas.forEach(reserva -> modeloTbReservas.addRow(new Object[] {
+                reserva.getId(),
+                reserva.getFecha_entrada(),
+                reserva.getFecha_salida(),
+                reserva.getValor(),
+                reserva.getForma_de_pago()
+        }));
+    }
+
+    private void eliminar(){
+        if (!tieneFilaElegidaReserva() || !tieneFilaElegidaHuespedes()){
+            if (!tieneFilaElegidaReserva()){
+                Optional.ofNullable(modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),tbReservas.getSelectedColumn()))
+                    .ifPresent(fila->{
+                        Integer id = Integer.valueOf(modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),0).toString());
+                        this.reservaController.eliminar(id);
+                        modeloTbReservas.removeRow(tbReservas.getSelectedRow());
+                        JOptionPane.showMessageDialog(this, "Item eliminado con éxito!");
+                    });
+            } else if(!tieneFilaElegidaHuespedes()) {
+                Optional.ofNullable(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),tbHuespedes.getSelectedColumn()))
+                        .ifPresent(fila->{
+                            Integer id = Integer.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),0).toString());
+                            this.huespedController.eliminarHuesped(id);
+                            modeloHuesped.removeRow(tbHuespedes.getSelectedRow());
+                            JOptionPane.showMessageDialog(this, "Item eliminado con éxito!");
+                        });
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, elije un item");
+        }
+    }
+    private void modificar() {
+        if (!tieneFilaElegidaReserva() || !tieneFilaElegidaHuespedes()){
+            if (!tieneFilaElegidaReserva()){
+                Optional.ofNullable(modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),tbReservas.getSelectedColumn()))
+                        .ifPresentOrElse(fila->{
+                            Integer id = Integer.valueOf(modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),0).toString());
+                            Date fechaEntrada = (Date) modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),1);
+                            Date fechaSalida = (Date) modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),2);
+                            Double valor = (Double) modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),5);
+                            String formaPago = (String) modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),6);
+
+                            this.reservaController.modificarReservas(fechaEntrada,fechaSalida,valor,formaPago,id);
+                        }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
+
+            } else if(!tieneFilaElegidaHuespedes()) {
+                Optional.ofNullable(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),tbHuespedes.getSelectedColumn()))
+                        .ifPresentOrElse(fila->{
+                            Integer id = Integer.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),0).toString());
+                            String nombre = (String) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),1);
+                            String apellido = (String) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),2);
+                            Date fechaNacimiento = (Date) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),3);
+                            String nacionalidad = (String) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),4);
+                            String telefono = (String) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),5);
+
+                            this.huespedController.modificarHuespedes(id,nombre,apellido,fechaNacimiento,nacionalidad,telefono);
+
+                        },() -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, elije un item");
+        }
     }
 
     //Código que permite mover la ventana por la pantalla según la posición de "x" y "y"

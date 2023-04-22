@@ -8,7 +8,10 @@ import javax.swing.JTextField;
 import java.awt.Color;
 import com.toedter.calendar.JDateChooser;
 import controller.HuespedController;
+import controller.ReservaController;
+import dao.ReservaDAO;
 import modelo.Huesped;
+import modelo.Reserva;
 
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
@@ -43,20 +46,21 @@ public class RegistroHuesped extends JFrame {
     private JComboBox<Format> txtNacionalidad;
     private JLabel labelExit;
     private JLabel labelAtras;
-    private LocalDate fechaN;
-
+    private Date fechaN;
     private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
     private HuespedController huespedController;
+    private ReservaController reservaController;
+
+    private ReservaDAO reservaDAO;
     int xMouse, yMouse;
     /**
      * Launch the application.
      */
     public static void main(String[] args) {
-
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    RegistroHuesped frame = new RegistroHuesped();
+                    RegistroHuesped frame = new RegistroHuesped(0);
                     frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -68,8 +72,10 @@ public class RegistroHuesped extends JFrame {
     /**
      * Create the frame.
      */
-    public RegistroHuesped() {
+    public RegistroHuesped(int reservaId) {
         this.huespedController = new HuespedController();
+        this.reservaController = new ReservaController();
+
         setIconImage(Toolkit.getDefaultToolkit().getImage(RegistroHuesped.class.getResource("/imagenes/lOGO-50PX.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 910, 634);
@@ -155,7 +161,6 @@ public class RegistroHuesped extends JFrame {
         txtFechaN.getCalendarButton().setIcon(new ImageIcon(RegistroHuesped.class.getResource("/imagenes/icon-reservas.png")));
         txtFechaN.getCalendarButton().setBackground(SystemColor.textHighlight);
         txtFechaN.setDateFormatString("yyyy-MM-dd");
-        //fechaN = LocalDate.parse(txtFechaN.getDate().toString());
 
         contentPane.add(txtFechaN);
 
@@ -220,8 +225,11 @@ public class RegistroHuesped extends JFrame {
         txtNreserva.setFont(new Font("Roboto", Font.PLAIN, 16));
         txtNreserva.setBounds(560, 495, 285, 33);
         txtNreserva.setColumns(10);
+        txtNreserva.setEditable(false);
         txtNreserva.setBackground(Color.WHITE);
         txtNreserva.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+        String id = String.valueOf(reservaId);
+        txtNreserva.setText(id);
         contentPane.add(txtNreserva);
 
         JSeparator separator_1_2 = new JSeparator();
@@ -327,8 +335,6 @@ public class RegistroHuesped extends JFrame {
         labelExit.setForeground(SystemColor.black);
         labelExit.setFont(new Font("Roboto", Font.PLAIN, 18));
     }
-
-
     //Código que permite mover la ventana por la pantalla según la posición de "x" y "y"
     private void headerMousePressed(java.awt.event.MouseEvent evt) {
         xMouse = evt.getX();
@@ -343,10 +349,10 @@ public class RegistroHuesped extends JFrame {
 
     private void guardarHuesped(){
         try{
-            fechaN = LocalDate.parse(sdf2.format(txtFechaN.getDate()));
+            fechaN = Date.valueOf(((JTextField)txtFechaN.getDateEditor().getUiComponent()).getText());
             var huesped = new Huesped(txtNombre.getText(),txtApellido.getText(),fechaN,txtNacionalidad.getSelectedItem().toString(),txtTelefono.getText());
-            this.huespedController.guardarHuesped(huesped);
-            System.out.println(txtNombre.getText() + txtApellido.getText() + fechaN);
+            var reserva_id = Integer.parseInt(txtNreserva.getText());
+            this.huespedController.guardarHuesped(huesped,reserva_id);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
