@@ -4,6 +4,7 @@ import dao.HuespedDAO;
 import factory.ConnectionFactory;
 import modelo.Huesped;
 
+import java.sql.Date;
 import java.util.List;
 
 public class HuespedController {
@@ -26,5 +27,9 @@ public class HuespedController {
 
     public int eliminarHuesped(Integer id){
         return huespedDAO.eliminarHuesped(id);
+    }
+
+    public void modificarHuespedes(Integer id, String nombre, String apellido, Date fechaNacimiento, String nacionalidad, String telefono) {
+        huespedDAO.modificarHuespedes(id, nombre, apellido, fechaNacimiento, nacionalidad, telefono);
     }
 }

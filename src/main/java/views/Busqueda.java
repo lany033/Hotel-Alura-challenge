@@ -2,7 +2,6 @@ package views;
 
 import controller.HuespedController;
 import controller.ReservaController;
-
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -10,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.sql.*;
 import java.util.Optional;
 
 @SuppressWarnings("serial")
@@ -256,6 +256,8 @@ public class Busqueda extends JFrame {
         btnEditar.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {
+                modificar();
+                limpiarTablas();
 
             }
             @Override
@@ -314,8 +316,17 @@ public class Busqueda extends JFrame {
         });
 
     }
+    private boolean tieneFilaElegidaReserva() {
 
-
+        return tbReservas.getSelectedRowCount() == 0 || tbReservas.getSelectedColumnCount() == 0;
+    }private boolean tieneFilaElegidaHuespedes() {
+        return tbHuespedes.getSelectedRowCount() == 0 || tbHuespedes.getSelectedColumnCount() == 0;
+    }
+    private void limpiarTablas() {
+        System.out.println("limpiando tablas");
+        modeloTbReservas.getDataVector().clear();
+        modeloHuesped.getDataVector().clear();
+    }
 
     private void cargarTablaHuesped() {
         var huespedes = huespedController.listarHuesped();
@@ -331,7 +342,6 @@ public class Busqueda extends JFrame {
         }));
     }
 
-
     private void cargarTablaDeReservas() {
         var reservas = reservaController.listar();
 
@@ -343,17 +353,7 @@ public class Busqueda extends JFrame {
                 reserva.getForma_de_pago()
         }));
     }
-    private boolean tieneFilaElegidaReserva() {
 
-        return tbReservas.getSelectedRowCount() == 0 || tbReservas.getSelectedColumnCount() == 0;
-    }private boolean tieneFilaElegidaHuespedes() {
-        return tbHuespedes.getSelectedRowCount() == 0 || tbHuespedes.getSelectedColumnCount() == 0;
-    }
-    private void limpiarTablas() {
-        System.out.println("limpiando tablas");
-        modeloTbReservas.getDataVector().clear();
-        modeloHuesped.getDataVector().clear();
-    }
     private void eliminar(){
         if (!tieneFilaElegidaReserva() || !tieneFilaElegidaHuespedes()){
             if (!tieneFilaElegidaReserva()){
@@ -377,6 +377,39 @@ public class Busqueda extends JFrame {
             JOptionPane.showMessageDialog(this, "Por favor, elije un item");
         }
     }
+    private void modificar() {
+        if (!tieneFilaElegidaReserva() || !tieneFilaElegidaHuespedes()){
+            if (!tieneFilaElegidaReserva()){
+                Optional.ofNullable(modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),tbReservas.getSelectedColumn()))
+                        .ifPresentOrElse(fila->{
+                            Integer id = Integer.valueOf(modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),0).toString());
+                            Date fechaEntrada = (Date) modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),1);
+                            Date fechaSalida = (Date) modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),2);
+                            Double valor = (Double) modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),5);
+                            String formaPago = (String) modeloTbReservas.getValueAt(tbReservas.getSelectedRow(),6);
+
+                            this.reservaController.modificarReservas(fechaEntrada,fechaSalida,valor,formaPago,id);
+                        }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
+
+            } else if(!tieneFilaElegidaHuespedes()) {
+                Optional.ofNullable(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),tbHuespedes.getSelectedColumn()))
+                        .ifPresentOrElse(fila->{
+                            Integer id = Integer.valueOf(modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),0).toString());
+                            String nombre = (String) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),1);
+                            String apellido = (String) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),2);
+                            Date fechaNacimiento = (Date) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),3);
+                            String nacionalidad = (String) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),4);
+                            String telefono = (String) modeloHuesped.getValueAt(tbHuespedes.getSelectedRow(),5);
+
+                            this.huespedController.modificarHuespedes(id,nombre,apellido,fechaNacimiento,nacionalidad,telefono);
+
+                        },() -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, elije un item");
+        }
+    }
+
     //Código que permite mover la ventana por la pantalla según la posición de "x" y "y"
     private void headerMousePressed(java.awt.event.MouseEvent evt) {
         xMouse = evt.getX();

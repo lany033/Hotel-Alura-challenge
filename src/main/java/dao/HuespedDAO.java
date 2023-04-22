@@ -85,4 +85,29 @@ public class HuespedDAO {
         }
     }
 
+    public void modificarHuespedes(Integer id, String nombre, String apellido, Date fechaNacimiento, String nacionalidad, String telefono) {
+        try (con){
+            final PreparedStatement statement = con.prepareStatement("UPDATE HUESPEDES SET "
+                    + "NOMBRE = ?"
+                    + ", APELLIDO = ?"
+                    + ", FECHA_DE_NACIMIENTO = ?"
+                    + ", NACIONALIDAD = ?"
+                    + ", TELEFONO = ?"
+                    + " WHERE ID = ?");
+
+            try(statement) {
+                statement.setString(1, nombre);
+                statement.setString(2,apellido);
+                statement.setDate(3, fechaNacimiento);
+                statement.setString(4, nacionalidad);
+                statement.setString(5, telefono);
+                statement.setInt(6, id);
+                statement.execute();
+
+                System.out.println("Se modifico huesped "+ nombre );
+            }
+        }catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -3,7 +3,6 @@ package dao;
 import factory.ConnectionFactory;
 import modelo.Reserva;
 import java.sql.*;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,6 +76,30 @@ public class ReservaDAO {
                 return statement.getUpdateCount();
             }
         }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void modificarReservas(Date fechaEntrada, Date fechaSalida, Double valor, String formaPago, Integer id) {
+        try (con){
+            final PreparedStatement statement = con.prepareStatement("UPDATE RESERVAS SET "
+                    + " FECHA_ENTRADA = ?"
+                    + ", FECHA_SALIDAD = ?"
+                    + ", VALOR = ?"
+                    + ", FORMA_PAGO = ?"
+                    + " WHERE ID = ?");
+
+            try(statement) {
+                statement.setDate(1, fechaEntrada);
+                statement.setDate(2,fechaSalida);
+                statement.setDouble(3, valor);
+                statement.setString(4, formaPago);
+                statement.setInt(5, id);
+                statement.execute();
+
+                System.out.println("Se modifico reservas");
+            }
+        }catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }

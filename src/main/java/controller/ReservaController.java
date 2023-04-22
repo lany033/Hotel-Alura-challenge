@@ -3,7 +3,7 @@ package controller;
 import dao.ReservaDAO;
 import factory.ConnectionFactory;
 import modelo.Reserva;
-
+import java.sql.*;
 import java.util.List;
 
 public class ReservaController {
@@ -26,4 +26,7 @@ public class ReservaController {
         return reservaDAO.eliminar(id);
     }
 
+    public void modificarReservas(Date fechaEntrada, Date fechaSalida, Double valor, String formaPago, Integer id) {
+        reservaDAO.modificarReservas(fechaEntrada, fechaSalida, valor, formaPago, id);
+    }
 }
