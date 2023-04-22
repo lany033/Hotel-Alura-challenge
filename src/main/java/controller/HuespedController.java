@@ -23,4 +23,8 @@ public class HuespedController {
     public List<Huesped> listarHuesped(){
         return huespedDAO.listarHuesped();
     }
+
+    public int eliminarHuesped(Integer id){
+        return huespedDAO.eliminarHuesped(id);
+    }
 }

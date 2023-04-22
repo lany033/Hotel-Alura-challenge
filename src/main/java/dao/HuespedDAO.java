@@ -70,4 +70,19 @@ public class HuespedDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public int eliminarHuesped(Integer id){
+        try(con) {
+            final PreparedStatement statement = con.prepareStatement("DELETE FROM HUESPEDES WHERE ID = ?");
+            try (statement){
+                statement.setInt(1, id);
+                statement.execute();
+                System.out.println("Eliminando HUESPED " + id);
+                return statement.getUpdateCount();
+            }
+        }catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+
 }
